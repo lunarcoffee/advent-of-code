@@ -6,6 +6,6 @@ for [a, b], [c, d] in lines:
     if a == c or b == d:
         for x in range(min(a, c), max(a, c) + 1):
             for y in range(min(b, d), max(b, d) + 1):
-                p[(x, y)] = p.get((x, y), 0) + 1
+                p[x, y] = p.get((x, y), 0) + 1
 
 print(sum(c > 1 for c in p.values()))

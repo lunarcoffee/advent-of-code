@@ -6,9 +6,7 @@ for i, n in f:
     if i[0] == "f":
         x += n
         y += a * n
-    elif i[0] == "u":
-        a -= n
     else:
-        a += n
+        a += n * ((i[0] == "d") * 2 - 1)
 
 print(x * y)
