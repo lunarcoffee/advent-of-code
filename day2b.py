@@ -1,5 +1,4 @@
-f = [i.split() for i in open("in2.txt").readlines()]
-f = [(a, int(b)) for a, b in f]
+f = [(a, int(b)) for a, b in [i.split() for i in open("in2.txt").readlines()]]
 
 x, y, a = 0, 0, 0
 for i, n in f:

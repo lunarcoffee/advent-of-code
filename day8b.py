@@ -1,6 +1,3 @@
-import itertools
-
-
 total = 0
 for r in open("in8.txt").readlines():
     r, p = [s.split() for s in r.split(" | ")]
