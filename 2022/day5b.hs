@@ -1,21 +1,22 @@
 import Control.Arrow
-import Data.Char (isAlpha, isNumber)
-import Data.Foldable (toList)
+import Data.Char (isAlpha, isDigit)
 import Data.List (foldl', transpose)
 import Data.List.Split (chunksOf)
-import qualified Data.Sequence as S
 
-runMoves :: (S.Seq String, [[Int]]) -> S.Seq String
-runMoves (state, moves) = foldl' moveCrates state moves
+adjust :: (a -> a) -> Int -> [a] -> [a]
+adjust f i xs = take i xs ++ [f $ xs !! i] ++ drop (i + 1) xs
+
+runMoves :: ([String], [[Int]]) -> [String]
+runMoves = uncurry $ foldl' moveCrates
   where
     moveCrates state [n, src, dest] =
-      S.adjust (crates ++) dest $ S.adjust (drop $ n + 1) src state
+      adjust (crates ++) (dest - 1) $ adjust (drop n) (src - 1) state
       where
-        crates = take (n + 1) $ S.index state src
+        crates = take n $ state !! (src - 1)
 
 main :: IO ()
-main = getContents >>= putStrLn . toList . fmap head . runMoves . parse
+main = getContents >>= putStrLn . map head . runMoves . parse
   where
-    parse = (S.fromList . parseState *** parseMoves . tail) . span (/= "") . lines
     parseState = map (filter isAlpha . (!! 1)) . chunksOf 4 . transpose
-    parseMoves = map $ map (pred . read) . filter (all isNumber) . words
+    parseMoves = map (map read . filter (all isDigit) . words) . tail
+    parse = (parseState *** parseMoves) . span (/= "") . lines

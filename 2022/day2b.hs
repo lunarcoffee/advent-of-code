@@ -1,18 +1,12 @@
-import Control.Applicative
 import Data.Char (ord)
-import Data.List (elemIndex)
-import Data.Maybe (fromJust)
 
-sumRounds :: [String] -> Int
-sumRounds = sum . map ((+) <$> resultPoints <*> counterPoints)
+roundScore :: (Int, Int) -> Int
+roundScore = (+) <$> resultPoints <*> movePoints
   where
-    moveIndex m = fromJust $ elemIndex m "XYZ" <|> elemIndex m "ABC"
-    resultPoints = (* 3) . moveIndex . last
-    counterPoints [a, b] = [3, 1, 2, 3, 1] !! newIndex
-      where
-        newIndex = moveIndex a + ord b - ord 'X'
+    movePoints (a, b) = cycle [1 .. 3] !! (a + b + 2)
+    resultPoints = (* 3) . snd
 
 main :: IO ()
-main = getContents >>= print . sumRounds . parseRounds
+main = getContents >>= print . sum . map roundScore . parseRounds
   where
-    parseRounds = map (\[x, _, y] -> [x, y]) . lines
+    parseRounds = map (\[x, _, y] -> (ord x - ord 'A', ord y - ord 'X')) . lines

@@ -1,11 +1,9 @@
-import Data.List (isInfixOf, length)
+import Data.List (intersect, length)
 import Data.List.Split (splitOn)
 
-countSublists :: [[[Int]]] -> Int
-countSublists = length . filter (\[a, b] -> isInfixOf a b || isInfixOf b a)
-
 main :: IO ()
-main = getContents >>= print . countSublists . parseRanges
+main = getContents >>= print . countContains . parseRanges
   where
-    parseRange = (\[x, y] -> [x .. y]) . map read . splitOn "-"
+    parseRange = (\[x, y] -> [x .. y] :: [Int]) . map read . splitOn "-"
     parseRanges = map (map parseRange . splitOn ",") . lines
+    countContains = length . filter (flip elem <*> foldl1 intersect)
