@@ -1,6 +1,6 @@
 # Advent of Code
  
-My attempts at Advent of Code problems, many of which I revise a
-bit after the initial solve. Happy holidays!
+These are my solutions for the Advent of Code problems from various years! Many of them are revised
+a bit after the initial solve. Happy holidays!
 
-🎄🎁
+🎄🎁 :)
