@@ -9,5 +9,5 @@ bagPriority = (+ 1) . priority . head . uncurry intersect
 main :: IO ()
 main = getContents >>= print . sum . map bagPriority . parseBags
   where
-    bisect = flip splitAt <*> (`div` 2) . length
+    bisect = (`div` 2) . length >>= splitAt
     parseBags = map bisect . lines
