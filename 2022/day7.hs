@@ -1,32 +1,36 @@
-import Data.List (stripPrefix)
+import Data.List (foldl', sort, stripPrefix)
 import qualified Data.Map as Map
 
-data Record = File Int | Dir Dir
-
 type Dir = Map.Map String Record
+
+data Record = File Int | Dir Dir
 
 adjustAtPath :: (Dir -> Dir) -> [String] -> Dir -> Dir
 adjustAtPath fn [] = fn
 adjustAtPath fn (dir : path) = Map.adjust (Dir . adjustAtPath fn path . \(Dir d) -> d) dir
 
-allDirSizes :: Dir -> [Int]
-allDirSizes = Map.foldl' collectSizes [0]
+dirSizes :: Record -> [Int]
+dirSizes (File _) = []
+dirSizes r@(Dir dir) = recordSize r : Map.foldl' (\sizes new -> sizes ++ dirSizes new) [] dir
   where
-    collectSizes (size : inners) (File new) = size + new : inners
-    collectSizes (size : inners) (Dir new) =
-      let newSizes = allDirSizes new
-       in size + head newSizes : inners ++ newSizes
+    recordSize (File size) = size
+    recordSize (Dir dir) = sum $ Map.map recordSize dir
+
+minAllowingUpdate :: [Int] -> Int
+minAllowingUpdate dir = head . filter (>= head dir - 40_000_000) $ sort dir
 
 main :: IO ()
-main = getContents >>= print . sum . filter (<= 100_000) . allDirSizes . parseFilesystem
+main = do
+  input <- parseFilesystem <$> getContents
+  print $ sum $ filter (<= 100_000) $ dirSizes input
+  print $ minAllowingUpdate $ dirSizes input
   where
-    parseFilesystem = fst . foldl parseLine (Map.empty, []) . lines
+    parseFilesystem = Dir . fst . foldl' parseLine (Map.empty, []) . lines
     parseLine (fs, cwd) line
       | Just dir <- stripPrefix "$ cd " line = case dir of
-          ".." -> (fs, init cwd)
           "/" -> (fs, [])
+          ".." -> (fs, init cwd)
           _ -> (makeDir dir, cwd ++ [dir])
-      | Just dir <- stripPrefix "dir " line = (makeDir dir, cwd)
       | [size, name] <- words line, size /= "$" = (makeFile name $ read size, cwd)
       | otherwise = (fs, cwd)
       where
