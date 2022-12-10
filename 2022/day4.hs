@@ -2,7 +2,7 @@ import Data.List (foldl1', intersect, length)
 import Data.List.Split (splitOn)
 
 countContains :: [[[Int]]] -> Int
-countContains = length . filter (foldl1' intersect >>= elem)
+countContains = length . filter (elem =<< foldl1' intersect)
 
 countOverlaps :: [[[Int]]] -> Int
 countOverlaps = length . filter ((/= []) . foldl1' intersect)
