@@ -15,9 +15,9 @@ countTailPositions n = length . nub . map last . scanl' runMove (replicate n (0,
 
 main :: IO ()
 main = do
-  input <- parse <$> getContents
-  print $ countTailPositions 2 input
-  print $ countTailPositions 10 input
+  moves <- parse <$> getContents
+  print $ countTailPositions 2 moves
+  print $ countTailPositions 10 moves
   where
     parseDir = head . flip elemIndices "LRUD" . head
     parse = concatMap (replicate <$> read . drop 2 <*> parseDir) . lines

@@ -9,9 +9,9 @@ groupPriority = (+ 1) . priority . head . foldl1' intersect
 
 main :: IO ()
 main = do
-  input <- lines <$> getContents
-  print $ sum $ map (groupPriority . bisect) input
-  print $ sum $ map groupPriority $ chunksOf 3 input
+  bags <- lines <$> getContents
+  print $ sum $ map (groupPriority . bisect) bags
+  print $ sum $ map groupPriority $ chunksOf 3 bags
   where
-    bisect xs = [take (mid xs) xs, drop (mid xs) xs]
-    mid = (`div` 2) . length
+    bisect xs = [take (midIndex xs) xs, drop (midIndex xs) xs]
+    midIndex = (`div` 2) . length

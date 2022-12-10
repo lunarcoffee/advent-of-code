@@ -21,9 +21,9 @@ minAllowingUpdate dir = head . filter (>= head dir - 40_000_000) $ sort dir
 
 main :: IO ()
 main = do
-  input <- parseFilesystem <$> getContents
-  print $ sum $ filter (<= 100_000) $ dirSizes input
-  print $ minAllowingUpdate $ dirSizes input
+  sizes <- dirSizes . parseFilesystem <$> getContents
+  print $ sum $ filter (<= 100_000) sizes
+  print $ minAllowingUpdate sizes
   where
     parseFilesystem = Dir . fst . foldl' parseLine (Map.empty, []) . lines
     parseLine (fs, cwd) line

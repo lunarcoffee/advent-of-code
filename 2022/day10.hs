@@ -5,8 +5,8 @@ import Data.List.Split (chunksOf, splitOn)
 regStates :: [Int -> Int] -> [Int]
 regStates = init . scanl' (flip ($)) 1
 
-sumStrengths :: [Int -> Int] -> Int
-sumStrengths instrs = sum $ map ((*) <*> ((0 : regStates instrs) !!)) [20, 60 .. 220]
+sumStrengths :: [Int] -> Int
+sumStrengths sprites = sum $ map ((*) <*> (sprites !!) . pred) [20, 60 .. 220]
 
 generateCRT :: [Int] -> [String]
 generateCRT = chunksOf 40 . zipWith cellValue [0 ..]
@@ -17,9 +17,9 @@ generateCRT = chunksOf 40 . zipWith cellValue [0 ..]
 
 main :: IO ()
 main = do
-  input <- parse <$> getContents
-  print $ sumStrengths input
-  mapM_ putStrLn $ generateCRT $ regStates input
+  states <- regStates . parse <$> getContents
+  print $ sumStrengths states
+  mapM_ putStrLn $ generateCRT states
   where
     parseInstruction ["addx", v] = [id, (+ read v)]
     parseInstruction _ = [id]

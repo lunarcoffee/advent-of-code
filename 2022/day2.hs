@@ -14,8 +14,8 @@ roundScoreResult = (+) <$> resultPoints <*> movePoints
 
 main :: IO ()
 main = do
-  input <- parseRounds <$> getContents
-  print $ sum $ map roundScoreMove input
-  print $ sum $ map roundScoreResult input
+  rounds <- parseRounds <$> getContents
+  print $ sum $ map roundScoreMove rounds
+  print $ sum $ map roundScoreResult rounds
   where
     parseRounds = map (\[x, _, y] -> (ord x - ord 'A', ord y - ord 'X')) . lines
