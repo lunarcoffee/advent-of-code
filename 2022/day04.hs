@@ -13,5 +13,5 @@ main = do
   print $ countContains ranges
   print $ countOverlaps ranges
   where
-    parseRange = (\[x, y] -> [x .. y] :: [Int]) . map read . splitOn "-"
+    parseRange = (\[x, y] -> [x .. y]) . map read . splitOn "-"
     parseRanges = map (map parseRange . splitOn ",") . lines

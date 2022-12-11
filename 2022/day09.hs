@@ -1,3 +1,4 @@
+import Control.Monad
 import Data.List (elemIndices, nub, scanl')
 
 type Pos = (Int, Int)
@@ -20,4 +21,4 @@ main = do
   print $ countTailPositions 10 moves
   where
     parseDir = head . flip elemIndices "LRUD" . head
-    parse = concatMap (replicate <$> read . drop 2 <*> parseDir) . lines
+    parse = replicate <$> read . drop 2 <*> parseDir <=< lines

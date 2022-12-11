@@ -2,11 +2,8 @@ import Control.Monad
 import Data.List (scanl')
 import Data.List.Split (chunksOf, splitOn)
 
-regStates :: [Int -> Int] -> [Int]
-regStates = init . scanl' (flip ($)) 1
-
 sumStrengths :: [Int] -> Int
-sumStrengths sprites = sum $ map ((*) <*> (sprites !!) . pred) [20, 60 .. 220]
+sumStrengths states = sum [c * states !! (c - 1) | c <- [20, 60 .. 220]]
 
 generateCRT :: [Int] -> [String]
 generateCRT = chunksOf 40 . zipWith cellValue [0 ..]
@@ -17,10 +14,9 @@ generateCRT = chunksOf 40 . zipWith cellValue [0 ..]
 
 main :: IO ()
 main = do
-  states <- regStates . parse <$> getContents
+  states <- init . scanl' (+) 1 . parseToStates <$> getContents
   print $ sumStrengths states
   mapM_ putStrLn $ generateCRT states
   where
-    parseInstruction ["addx", v] = [id, (+ read v)]
-    parseInstruction _ = [id]
-    parse = parseInstruction . splitOn " " <=< lines
+    parseInstruction (_ : v) = 0 : map read v
+    parseToStates = parseInstruction . splitOn " " <=< lines

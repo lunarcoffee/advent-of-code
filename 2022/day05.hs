@@ -4,7 +4,7 @@ import Data.List (foldl', transpose)
 import Data.List.Split (chunksOf)
 
 adjust :: (a -> a) -> Int -> [a] -> [a]
-adjust f i xs = take i xs ++ [f $ xs !! i] ++ drop (i + 1) xs
+adjust f i = zipWith (\j -> if j == i then f else id) [0 ..]
 
 runMoves :: (String -> String) -> ([String], [[Int]]) -> [String]
 runMoves order = uncurry $ foldl' moveCrates
