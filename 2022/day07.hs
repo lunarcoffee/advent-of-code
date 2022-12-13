@@ -1,36 +1,23 @@
-import Control.Lens
-import Data.List (foldl', sort, stripPrefix)
-import Data.Map qualified as Map
+import Data.Char (isDigit)
+import Data.List (foldl', isPrefixOf, nub, sort, stripPrefix)
 
-type Dir = Map.Map String Record
-
-data Record = File Int | Dir Dir
-
-dirSizes :: Record -> [Int]
-dirSizes (File _) = []
-dirSizes r@(Dir dir) = recordSize r : Map.foldl' (\sizes new -> sizes ++ dirSizes new) [] dir
-  where
-    recordSize (File size) = size
-    recordSize (Dir dir) = sum $ Map.map recordSize dir
+dirSizes :: [([String], Int)] -> [[String]] -> [Int]
+dirSizes fs = map (\d -> sum [s | (path, s) <- fs, d `isPrefixOf` path]) . nub
 
 minAllowingUpdate :: [Int] -> Int
-minAllowingUpdate dir = head . filter (>= head dir - 40_000_000) $ sort dir
+minAllowingUpdate sizes = head . filter (>= maximum sizes - 40_000_000) $ sort sizes
 
 main :: IO ()
 main = do
-  sizes <- dirSizes . parseFilesystem <$> getContents
+  sizes <- uncurry dirSizes . parseFilesystem <$> getContents
   print $ sum $ filter (<= 100_000) sizes
   print $ minAllowingUpdate sizes
   where
-    parseFilesystem = Dir . fst . foldl' parseLine (Map.empty, []) . lines
-    parseLine (fs, cwd) line
+    parseFilesystem = foldl' parseLine ([], [[]]) . lines
+    parseLine s@(fs, cwds@(cwd : _)) line
       | Just dir <- stripPrefix "$ cd " line = case dir of
-          "/" -> (fs, [])
-          ".." -> (fs, init cwd)
-          _ -> (makeDir dir, cwd ++ [dir])
-      | [size, name] <- words line, size /= "$" = (makeFile name $ read size, cwd)
-      | otherwise = (fs, cwd)
-      where
-        adjustPath = foldr (\d lens -> ix d %~ (Dir . lens . (\(Dir d) -> d)))
-        makeDir dir = adjustPath (Map.insert dir $ Dir Map.empty) cwd fs
-        makeFile name size = adjustPath (Map.insert name $ File size) cwd fs
+          "/" -> (fs, [] : cwds)
+          ".." -> (fs, init cwd : cwds)
+          _ -> let new = cwd ++ [dir] in (fs, new : cwds)
+      | [size, name] <- words line, all isDigit size = ((cwd, read size) : fs, cwds)
+      | otherwise = s
