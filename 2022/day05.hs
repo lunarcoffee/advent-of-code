@@ -1,18 +1,15 @@
 import Control.Arrow
+import Control.Lens
 import Data.Char (isAlpha, isDigit)
 import Data.List (foldl', transpose)
 import Data.List.Split (chunksOf)
-
-adjust :: (a -> a) -> Int -> [a] -> [a]
-adjust f i = zipWith (\j -> if j == i then f else id) [0 ..]
 
 runMoves :: (String -> String) -> ([String], [[Int]]) -> [String]
 runMoves order = uncurry $ foldl' moveCrates
   where
     moveCrates state [n, src, dest] =
-      adjust (crates ++) (dest - 1) $ adjust (drop n) (src - 1) state
-      where
-        crates = order $ take n $ state !! (src - 1)
+      let crates = order $ take n $ state !! (src - 1)
+       in state & ix (dest - 1) %~ (crates ++) & ix (src - 1) %~ drop n
 
 main :: IO ()
 main = do

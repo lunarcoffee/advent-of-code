@@ -1,13 +1,10 @@
+import Control.Lens
 import Data.List (foldl', sort, stripPrefix)
-import qualified Data.Map as Map
+import Data.Map qualified as Map
 
 type Dir = Map.Map String Record
 
 data Record = File Int | Dir Dir
-
-adjustAtPath :: (Dir -> Dir) -> [String] -> Dir -> Dir
-adjustAtPath fn [] = fn
-adjustAtPath fn (dir : path) = Map.adjust (Dir . adjustAtPath fn path . \(Dir d) -> d) dir
 
 dirSizes :: Record -> [Int]
 dirSizes (File _) = []
@@ -34,5 +31,6 @@ main = do
       | [size, name] <- words line, size /= "$" = (makeFile name $ read size, cwd)
       | otherwise = (fs, cwd)
       where
-        makeDir dir = adjustAtPath (Map.insert dir $ Dir Map.empty) cwd fs
-        makeFile name size = adjustAtPath (Map.insert name $ File size) cwd fs
+        adjustPath = foldr (\d lens -> ix d %~ (Dir . lens . (\(Dir d) -> d)))
+        makeDir dir = adjustPath (Map.insert dir $ Dir Map.empty) cwd fs
+        makeFile name size = adjustPath (Map.insert name $ File size) cwd fs
