@@ -13,5 +13,5 @@ main = do
   print $ sum $ map (groupPriority . bisect) bags
   print $ sum $ map groupPriority $ chunksOf 3 bags
   where
-    bisect xs = [take (midIndex xs) xs, drop (midIndex xs) xs]
     midIndex = (`div` 2) . length
+    bisect xs = [take (midIndex xs) xs, drop (midIndex xs) xs]
