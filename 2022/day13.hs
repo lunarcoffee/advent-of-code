@@ -1,5 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE TypeFamilies #-}
 
 import Control.Monad
 import Data.List (findIndices, sort)

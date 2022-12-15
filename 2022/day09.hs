@@ -9,8 +9,8 @@ follow (a, b) t@(x, y) =
    in if dx ^ 2 + dy ^ 2 <= 2 then t else (x + signum dx, y + signum dy)
 
 runMove :: [Pos] -> Int -> [Pos]
-runMove ((hx, hy) : knots) dir =
-  let newHead = [(hx - 1, hy), (hx + 1, hy), (hx, hy - 1), (hx, hy + 1)] !! dir
+runMove ((x, y) : knots) dir =
+  let newHead = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)] !! dir
    in scanl' follow newHead knots
 
 countTailPositions :: Int -> [Int] -> Int
