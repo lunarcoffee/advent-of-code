@@ -1,7 +1,11 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE QuasiQuotes #-}
 
+import Control.Parallel.Strategies (parMap, rpar)
+import Data.Foldable (asum)
 import Data.List (find, foldl', sort)
+import Data.List.Split (chunksOf)
+import GHC.Conc (numCapabilities)
 import Text.Regex.PCRE.Heavy (re, scan)
 
 type Pos = (Int, Int)
@@ -11,20 +15,22 @@ noBeaconRanges y = (foldl' merge =<< (: []) . head) . sort . filter (uncurry (<=
   where
     toRange ((a, b), (c, d)) = let x = abs (c - a) + abs (d - b) - abs (y - b) in (a - x, a + x)
     merge ar@((a, b) : rs) r@(c, d)
-      | c <= b = rs ++ [(a, max b d)]
-      | otherwise = ar ++ [r]
+      | c <= b + 1 = (a, max b d) : rs
+      | otherwise = r : ar
 
-distressTuningFreq :: [(Pos, Pos)] -> Int
-distressTuningFreq bs =
-  let ixedRanges = (zip <*> map (`noBeaconRanges` bs)) [0 .. 4_000_000]
-      Just (y, (_, x) : _) = find ((> 1) . length . snd) ixedRanges
-   in 4_000_000 * (x + 1) + y
+distressTuningFreq :: Int -> Int -> [(Pos, Pos)] -> Int
+distressTuningFreq from to bs =
+  let chunkSize = (to - from + 1) `div` numCapabilities * 3
+      Just (y, [_, (_, x)]) = asum $ parMap rpar findBeacon $ chunksOf chunkSize [from .. to]
+   in to * (x + 1) + y
+  where
+    findBeacon = find ((> 1) . length . snd) . (zip <*> map (`noBeaconRanges` bs))
 
 main :: IO ()
 main = do
   beacons <- parse <$> getContents
   print $ sum $ map (uncurry subtract) $ noBeaconRanges 2_000_000 beacons
-  print $ distressTuningFreq beacons
+  print $ distressTuningFreq 0 4_000_000 beacons
   where
     parseBeacon = (\[a, b, x, y] -> ((a, b), (x, y))) . map (read . fst) . scan [re|-?\d+|]
     parse = map parseBeacon . lines
