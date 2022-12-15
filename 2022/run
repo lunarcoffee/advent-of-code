@@ -3,10 +3,16 @@
 # little script to run puzzle solutions with input from stdin
 # ./run day1
 
-stack runghc \
-    --package split \
-    --package pcre-heavy \
-    --package megaparsec \
+set -e
+
+stack ghc \
     --package lens \
-    -- $1.hs \
-    <input/$1.in
+    --package megaparsec \
+    --package pcre-heavy \
+    --package split \
+    -- -O2 $1.hs
+
+printf "Running $1 ...\n\n"
+time ./$1 <input/$1.in
+
+rm $1 $1.hi $1.o $1.dyn_hi $1.dyn_o 2>/dev/null
