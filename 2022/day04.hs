@@ -1,4 +1,4 @@
-import Data.List (foldl1', intersect, length)
+import Data.List (foldl1', intersect)
 import Data.List.Split (splitOn)
 
 countContains :: [[[Int]]] -> Int
