@@ -4,8 +4,7 @@ import Data.List.Split (chunksOf)
 groupPriority :: [String] -> Int
 groupPriority = (+ 1) . priority . head . foldl1' intersect
   where
-    priorityMap = ['a' .. 'z'] ++ ['A' .. 'Z']
-    priority = head . (`elemIndices` priorityMap)
+    priority = head . (`elemIndices` (['a' .. 'z'] ++ ['A' .. 'Z']))
 
 main :: IO ()
 main = do

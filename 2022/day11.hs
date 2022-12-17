@@ -25,9 +25,8 @@ main = do
   print $ monkeyBusiness $ iterate (playRound id) monkeys !! 10_000
   where
     parseOp "* old" = (^ 2)
-    parseOp ('+' : _ : n) = (+ read n)
-    parseOp ('*' : _ : n) = (* read n)
-    parseMonkey [start, op, md, t, f] =
+    parseOp (op : _ : n) = (if op == '+' then (+) else (*)) $ read n
+    parseMonkey [inv, op, md, t, f] =
       let r n = read . drop n
-       in (read $ '[' : drop 18 start ++ "]", parseOp $ drop 23 op, r 21 md, r 29 t, r 30 f, 0)
+       in (read $ '[' : drop 18 inv ++ "]", parseOp $ drop 23 op, r 21 md, r 29 t, r 30 f, 0)
     parse = map (parseMonkey . tail . lines) . splitOn "\n\n"
