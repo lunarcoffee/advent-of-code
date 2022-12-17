@@ -4,7 +4,6 @@
 import Control.Parallel.Strategies (parMap, rpar)
 import Data.Foldable (asum)
 import Data.List (find, foldl', sort)
-import Data.List.Split (chunksOf)
 import GHC.Conc (numCapabilities)
 import Text.Regex.PCRE.Heavy (re, scan)
 
@@ -20,8 +19,9 @@ noBeaconRanges y = (foldl' merge =<< (: []) . head) . sort . filter (uncurry (<=
 
 distressTuningFreq :: Int -> Int -> [(Pos, Pos)] -> Int
 distressTuningFreq from to bs =
-  let chunkSize = (to - from + 1) `div` numCapabilities * 3
-      Just (y, [_, (_, x)]) = asum $ parMap rpar findBeacon $ chunksOf chunkSize [from .. to]
+  let chunkSize = (to - from + 1) `div` numCapabilities * 4
+      chunks = [[c .. c + chunkSize - 1] | c <- [from, from + chunkSize .. to]]
+      Just (y, [_, (_, x)]) = asum $ parMap rpar findBeacon chunks
    in to * (x + 1) + y
   where
     findBeacon = find ((> 1) . length . snd) . (zip <*> map (`noBeaconRanges` bs))
