@@ -1,6 +1,7 @@
 import Data.Char (ord)
 import Data.List (elemIndices)
 import Data.Maybe (fromMaybe)
+import Data.Set qualified as Set
 
 type Pos = (Int, Int)
 
@@ -9,21 +10,22 @@ type Direction = (Pos -> Pos -> Bool) -> Pos -> Pos -> Bool
 (@) :: [[a]] -> Pos -> a
 hs @ (x, y) = hs !! x !! y
 
-pathLength :: [[Int]] -> [(Pos, Int)] -> [Pos] -> (Pos -> Bool) -> Direction -> Int
-pathLength hs ((src@(a, b), dist) : dists) seen isDone dir
+minPathLength :: [[Int]] -> [(Pos, Int)] -> Set.Set Pos -> (Pos -> Bool) -> Direction -> Int
+minPathLength hs ((src@(a, b), dist) : nexts) seen isDone dir
   | isDone src = dist
-  | otherwise = pathLength hs (dists ++ newDists) (src : map fst newDists ++ seen) isDone dir
+  | otherwise = minPathLength hs (nexts ++ newAdjs) newSeen isDone dir
   where
+    newSeen = foldr Set.insert seen $ src : map fst newAdjs
+    newAdjs = [(n, dist + 1) | n <- adjs, Set.notMember n seen, dir canWalk src n]
     canWalk src dest = hs @ dest - hs @ src <= 1
-    newDists = [(n, dist + 1) | n <- adjacent, n `notElem` seen, dir canWalk src n]
+    adjs = filter inRange [(a - 1, b), (a + 1, b), (a, b - 1), (a, b + 1)]
     inRange (x, y) = and [x >= 0, y >= 0, x < length hs, y < length (head hs)]
-    adjacent = filter inRange [(a - 1, b), (a + 1, b), (a, b - 1), (a, b + 1)]
 
 distForwardBetween :: [[Int]] -> Pos -> Pos -> Int
-distForwardBetween hs src dest = pathLength hs [(src, 0)] [] (== dest) id
+distForwardBetween hs src dest = minPathLength hs [(src, 0)] Set.empty (== dest) id
 
 distBackwardToMin :: [[Int]] -> Pos -> Int
-distBackwardToMin hs dest = pathLength hs [(dest, 0)] [] ((== 0) . (hs @)) flip
+distBackwardToMin hs dest = minPathLength hs [(dest, 0)] Set.empty ((== 0) . (hs @)) flip
 
 main :: IO ()
 main = do
