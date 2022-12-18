@@ -14,14 +14,12 @@ surfaceArea ps = length $ filter (`Set.notMember` ps) $ adjs =<< toList ps
 externalArea :: Set.Set Pos -> Int
 externalArea ps = length $ filter (`Set.member` ps) $ adjs =<< toList (fill (x, y, z) Set.empty)
   where
-    bounds@[(x, _), (y, _), (z, _)] = map range [_1, _2, _3]
-    range get = ((,) <$> pred . minimum <*> (+ 1) . maximum) $ Set.map (^. get) ps
     fill p seen
-      | isValid p = foldr fill (Set.insert p seen) $ adjs p
-      | otherwise = seen
-      where
-        isValid p = inBounds p && p `Set.notMember` ps && p `Set.notMember` seen
-        inBounds (x, y, z) = and $ zipWith inRange bounds [x, y, z]
+      | outOfBounds p || p `Set.member` ps || p `Set.member` seen = seen
+      | otherwise = foldr fill (Set.insert p seen) $ adjs p
+    outOfBounds (x, y, z) = not $ and $ zipWith inRange bounds [x, y, z]
+    bounds@[(x, _), (y, _), (z, _)] = map range [_1, _2, _3]
+    range dim = ((,) <$> pred . minimum <*> (+ 1) . maximum) $ Set.map (^. dim) ps
 
 main :: IO ()
 main = do
