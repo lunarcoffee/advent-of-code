@@ -17,12 +17,12 @@ convergeBy key = until =<< (((==) `on` key) =<<)
 
 addSand :: Int -> Bool -> Set.Set Pos -> Set.Set Pos
 addSand floor stopOnFloor bs
-  | stopOnFloor && snd finalPos >= floor || Set.member (500, 0) bs = bs
+  | stopOnFloor && snd finalPos >= floor || (500, 0) `Set.member` bs = bs
   | otherwise = Set.insert finalPos bs
   where
     finalPos = convergeBy id step (500, 0)
     step p@(x, y) = maybe p step $ find isValid [(x, y + 1), (x - 1, y + 1), (x + 1, y + 1)]
-    isValid p@(_, y) = Set.notMember p bs && y <= floor
+    isValid p@(_, y) = p `Set.notMember` bs && y <= floor
 
 sandToFill :: Int -> Bool -> Set.Set Pos -> Int
 sandToFill floor stopOnFloor =

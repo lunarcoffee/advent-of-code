@@ -16,7 +16,7 @@ minPathLength hs ((src@(a, b), dist) : nexts) seen isDone dir
   | otherwise = minPathLength hs (nexts ++ newAdjs) newSeen isDone dir
   where
     newSeen = foldr Set.insert seen $ src : map fst newAdjs
-    newAdjs = [(n, dist + 1) | n <- adjs, Set.notMember n seen, dir canWalk src n]
+    newAdjs = [(n, dist + 1) | n <- adjs, n `Set.notMember` seen, dir canWalk src n]
     canWalk src dest = hs @ dest - hs @ src <= 1
     adjs = filter inRange [(a - 1, b), (a + 1, b), (a, b - 1), (a, b + 1)]
     inRange (x, y) = and [x >= 0, y >= 0, x < length hs, y < length (head hs)]
