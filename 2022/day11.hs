@@ -7,13 +7,13 @@ type Monkey = ([Integer], Integer -> Integer, Integer, Int, Int, Int)
 playRound :: (Integer -> Integer) -> [Monkey] -> [Monkey]
 playRound reduceWorry ms = foldl' playMonkey ms [0 .. length ms - 1]
   where
-    allMod = product $ map (^. _3) ms
     playMonkey ms m = foldl' processItem (ms & ix m . _6 +~ length inv & ix m . _1 .~ []) inv
       where
         (inv, op, md, t, f, _) = ms !! m
         processItem ms item =
           let newItem = reduceWorry (op item) `mod` allMod
            in ms & ix (if newItem `mod` md == 0 then t else f) . _1 %~ (++ [newItem])
+    allMod = product $ map (^. _3) ms
 
 monkeyBusiness :: [Monkey] -> Integer
 monkeyBusiness = product . take 2 . reverse . sort . map (toInteger . (^. _6))
