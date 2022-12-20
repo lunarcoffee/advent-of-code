@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 # little script to run puzzle solutions with input from stdin
-# ./run day1
+# ./run day01
 
 set -e
 
