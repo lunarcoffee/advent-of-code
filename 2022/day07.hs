@@ -19,5 +19,5 @@ main = do
           "/" -> (fs, [] : cwds)
           ".." -> (fs, init cwd : cwds)
           _ -> let new = cwd ++ [dir] in (fs, new : cwds)
-      | [size, name] <- words line, all isDigit size = ((cwd, read size) : fs, cwds)
+      | size : _ <- words line, all isDigit size = ((cwd, read size) : fs, cwds)
       | otherwise = s

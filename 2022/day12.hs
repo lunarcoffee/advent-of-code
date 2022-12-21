@@ -5,10 +5,10 @@ import Data.Set qualified as Set
 
 type Pos = (Int, Int)
 
-type Direction = (Pos -> Pos -> Bool) -> Pos -> Pos -> Bool
-
 (@) :: [[a]] -> Pos -> a
 hs @ (x, y) = hs !! x !! y
+
+type Direction = (Pos -> Pos -> Bool) -> Pos -> Pos -> Bool
 
 minPathLength :: [[Int]] -> [(Pos, Int)] -> Set.Set Pos -> (Pos -> Bool) -> Direction -> Int
 minPathLength hs ((src@(a, b), dist) : nexts) seen isDone dir

@@ -14,14 +14,14 @@ type DistanceMap = Map.Map String (Map.Map String Int)
 allDists :: ValveGraph -> DistanceMap
 allDists vs = Map.mapWithKey (\v _ -> Map.fromList $ minDists [(v, 0)] Set.empty []) vs
   where
-    minDists [] seen dists = dists
+    minDists [] _ dists = dists
     minDists (d@(src, dist) : nexts) seen dists =
       let newAdjs = [(n, dist + 1) | n <- snd $ vs Map.! src, n `notElem` seen]
           newSeen = foldr Set.insert seen $ src : map fst newAdjs
        in minDists (nexts ++ newAdjs) newSeen $ d : dists
 
 maxDrain :: ValveGraph -> DistanceMap -> [(String, Int)] -> Int -> Int
-maxDrain vs dm workers@((src, doneT) : ws) t = maximum $ Map.mapWithKey (potentialDrain src) vs
+maxDrain vs dm ((src, _) : ws) t = maximum $ Map.mapWithKey (potentialDrain src) vs
   where
     potentialDrain _ _ (0, _) = 0
     potentialDrain src v (rate, _) =
