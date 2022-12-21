@@ -1,6 +1,8 @@
 import Control.Lens
+import Control.Monad (guard)
 import Data.List (find)
 import Data.Map qualified as Map
+import Data.Maybe (fromMaybe)
 import Data.Set qualified as Set
 
 type Pos = (Int, Int)
@@ -25,8 +27,8 @@ stepCave (cave, (rIx, r) : rs, (_, j) : js, nr, h)
        in (foldr Set.insert cave sideR, spawnNext, js, nr + 1, newH)
   where
     [downR, sideR, _] = scanr ($) r [tryMove (_1 -~ 1), tryMove (_2 +~ j)]
-    tryMove dir r = let newR = map dir r in if any isInvalid newR then r else newR
-    isInvalid p@(_, y) = p `Set.member` cave || y < 0 || y > 6
+    tryMove = (fromMaybe <*>) . mapM . (((<$) <*> guard . isValid) .)
+    isValid p@(_, y) = p `Set.notMember` cave && y >= 0 && y < 7
 
 findCycle :: Int -> [(Int, Int)] -> (CaveState, Int, Int, Int, Int)
 findCycle depth js = findCycle' Map.empty (Set.fromAscList $ map (0,) [0 .. 6], rocks, js, 0, 0)
