@@ -24,10 +24,9 @@ decoderKey =
 
 main :: IO ()
 main = do
-  packets <- parse <$> getContents
+  packets <- (map parsePacket . lines <=< splitOn "\n\n") <$> getContents
   print $ orderedIndexSum packets
   print $ decoderKey packets
   where
-    prepend regex prefix = gsub regex $ (prefix ++) . head
     parsePacket = read . prepend [re|(\d+)|] "Int " . prepend [re|(\[)|] "List "
-    parse = map parsePacket . lines <=< splitOn "\n\n"
+    prepend regex prefix = gsub regex $ (prefix ++) . head

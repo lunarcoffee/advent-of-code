@@ -17,8 +17,6 @@ groveCoordSum xs =
 
 main :: IO ()
 main = do
-  file <- parseIndexed <$> getContents
+  file <- Seq.fromList . zip [0 ..] . map read . lines <$> getContents
   print $ groveCoordSum $ mix file
   print $ groveCoordSum $ iterate mix ((_2 *~ 811_589_153) <$> file) !! 10
-  where
-    parseIndexed = Seq.fromList . zip [0 ..] . map read . lines

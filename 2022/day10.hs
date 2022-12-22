@@ -14,9 +14,8 @@ generateCRT = chunksOf 40 . zipWith cellValue [0 ..]
 
 main :: IO ()
 main = do
-  states <- init . scanl' (+) 1 . parseToStates <$> getContents
+  states <- init . scanl' (+) 1 . (parseOp . splitOn " " <=< lines) <$> getContents
   print $ sumStrengths states
   mapM_ putStrLn $ generateCRT states
   where
-    parseInstruction (_ : v) = 0 : map read v
-    parseToStates = parseInstruction . splitOn " " <=< lines
+    parseOp (_ : v) = 0 : map read v

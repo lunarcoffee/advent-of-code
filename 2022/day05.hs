@@ -13,10 +13,9 @@ runMoves order = uncurry $ foldl' moveCrates
 
 main :: IO ()
 main = do
-  moves <- parse <$> getContents
+  moves <- (parseState *** parseMoves) . span (/= "") . lines <$> getContents
   putStrLn $ map head $ runMoves reverse moves
   putStrLn $ map head $ runMoves id moves
   where
     parseState = map (filter isAlpha . (!! 1)) . chunksOf 4 . transpose
     parseMoves = map (map read . filter (all isDigit) . words) . tail
-    parse = (parseState *** parseMoves) . span (/= "") . lines

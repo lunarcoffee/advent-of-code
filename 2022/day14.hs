@@ -31,8 +31,8 @@ sandToFill floor stopOnFloor =
 
 main :: IO ()
 main = do
-  (blocked, floor) <- traceBlocked . parse <$> getContents
+  (blocked, floor) <- traceBlocked . map parsePath . lines <$> getContents
   print $ sandToFill floor True blocked
   print $ sandToFill (floor + 1) False blocked
   where
-    parse = map (map (read . (++ ")") . ('(' :)) . splitOn " -> ") . lines
+    parsePath = map (read . (++ ")") . ('(' :)) . splitOn " -> "

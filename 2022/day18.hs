@@ -23,8 +23,6 @@ externalArea ps = length $ filter (`Set.member` ps) $ adjs =<< toList (fill (x, 
 
 main :: IO ()
 main = do
-  points <- parse <$> getContents
+  points <- Set.fromList . map (read . ('(' :) . (++ ")")) . lines <$> getContents
   print $ surfaceArea points
   print $ externalArea points
-  where
-    parse = Set.fromList . map (\c -> read $ '(' : c ++ ")") . lines

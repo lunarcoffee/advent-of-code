@@ -9,11 +9,10 @@ minAllowingUpdate sizes = head . filter (>= maximum sizes - 40_000_000) $ sort s
 
 main :: IO ()
 main = do
-  sizes <- uncurry dirSizes . parseFilesystem <$> getContents
+  sizes <- uncurry dirSizes . foldl' parseLine ([], [[]]) . lines <$> getContents
   print $ sum $ filter (<= 100_000) sizes
   print $ minAllowingUpdate sizes
   where
-    parseFilesystem = foldl' parseLine ([], [[]]) . lines
     parseLine s@(fs, cwds@(cwd : _)) line
       | Just dir <- stripPrefix "$ cd " line = case dir of
           "/" -> (fs, [] : cwds)

@@ -9,9 +9,8 @@ countOverlaps = length . filter ((/= []) . foldl1' intersect)
 
 main :: IO ()
 main = do
-  ranges <- parseRanges <$> getContents
+  ranges <- map (map parseRange . splitOn ",") . lines <$> getContents
   print $ countContains ranges
   print $ countOverlaps ranges
   where
     parseRange = (\[x, y] -> [x .. y]) . map read . splitOn "-"
-    parseRanges = map (map parseRange . splitOn ",") . lines

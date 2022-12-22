@@ -16,25 +16,23 @@ allDists vs = Map.mapWithKey (\v _ -> Map.fromList $ minDists [(v, 0)] Set.empty
   where
     minDists [] _ dists = dists
     minDists (d@(src, dist) : nexts) seen dists =
-      let newAdjs = [(n, dist + 1) | n <- snd $ vs Map.! src, n `notElem` seen]
-          newSeen = foldr Set.insert seen $ src : map fst newAdjs
-       in minDists (nexts ++ newAdjs) newSeen $ d : dists
+      let adjs' = [(n, dist + 1) | n <- snd $ vs Map.! src, n `notElem` seen]
+          seen' = foldr Set.insert seen $ src : map fst adjs'
+       in minDists (nexts ++ adjs') seen' $ d : dists
 
-maxDrain :: ValveGraph -> DistanceMap -> [(String, Int)] -> Int -> Int
-maxDrain vs dm ((src, _) : ws) t = maximum $ Map.mapWithKey (potentialDrain src) vs
+maxDrain :: ValveGraph -> DistanceMap -> [(String, Int)] -> Int
+maxDrain vs dm ((src, t) : ws) = maximum $ Map.mapWithKey (potentialDrain src) vs
   where
     potentialDrain _ _ (0, _) = 0
-    potentialDrain src v (rate, _) =
-      let newT = t - dm Map.! src Map.! v - 1
-          newWs@((_, nextT) : _) = ws ++ [(v, newT)]
-       in if newT < 0 then 0 else rate * newT + maxDrain (vs & ix v . _1 .~ 0) dm newWs nextT
+    potentialDrain src v (r, _) =
+      let t' = t - dm Map.! src Map.! v - 1
+       in if t' < 0 then 0 else r * t' + maxDrain (vs & ix v . _1 .~ 0) dm (ws ++ [(v, t')])
 
 main :: IO ()
 main = do
-  (valves, dists) <- ((,) <*> allDists) . parse <$> getContents
-  print $ maxDrain valves dists [("AA", 30)] 30
-  print $ maxDrain valves dists [("AA", 26), ("AA", 26)] 26
+  (valves, dists) <- ((,) <*> allDists) . Map.fromList . map parseValve . lines <$> getContents
+  print $ maxDrain valves dists [("AA", 30)]
+  print $ maxDrain valves dists [("AA", 26), ("AA", 26)]
   where
-    matchToValve [src, rate, dests] = (src, (read rate, splitOn ", " dests))
     parseValve = matchToValve . snd . head . scan [re|([A-Z]{2})[^\d]+(\d+).+es? (.+)$|]
-    parse = Map.fromList . map parseValve . lines
+    matchToValve [src, rate, dests] = (src, (read rate, splitOn ", " dests))

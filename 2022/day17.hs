@@ -20,13 +20,13 @@ type CaveState = (Set.Set Pos, [(Int, [Pos])], [(Int, Int)], Int, Int)
 
 stepCave :: CaveState -> CaveState
 stepCave (cave, (rIx, r) : rs, (_, j) : js, nr, h)
-  | downR /= sideR = (cave, (rIx, downR) : rs, js, nr, h)
+  | r' /= sideR = (cave, (rIx, r') : rs, js, nr, h)
   | otherwise =
-      let newH = maximum $ h : map fst sideR
-          spawnNext = rs & ix 0 . _2 %~ map (_1 +~ newH)
-       in (foldr Set.insert cave sideR, spawnNext, js, nr + 1, newH)
+      let h' = maximum $ h : map fst sideR
+          spawnNext = rs & ix 0 . _2 %~ map (_1 +~ h')
+       in (foldr Set.insert cave sideR, spawnNext, js, nr + 1, h')
   where
-    [downR, sideR, _] = scanr ($) r [tryMove (_1 -~ 1), tryMove (_2 +~ j)]
+    [r', sideR, _] = scanr ($) r [tryMove (_1 -~ 1), tryMove (_2 +~ j)]
     tryMove = (fromMaybe <*>) . mapM . (((<$) <*> guard . isValid) .)
     isValid p@(_, y) = p `Set.notMember` cave && y >= 0 && y < 7
 
@@ -35,23 +35,23 @@ findCycle depth js = findCycle' Map.empty (Set.fromAscList $ map (0,) [0 .. 6], 
   where
     findCycle' cache state@(cave, (rIx, r) : rs, js@((jIx, _) : _), nr, h)
       | rIx /= jIx = findCycle' cache $ stepCave state
-      | Just (nr1, h1) <- Map.lookup key cache = (contState, nr1, h1, nr - nr1, h - h1)
+      | Just (nr', h') <- Map.lookup key cache = (contState, nr', h', nr - nr', h - h')
       | otherwise = findCycle' (Map.insert key (nr, h) cache) $ stepCave state
       where
         contState = (stackTop, normR : rs, js, 0, 0)
         key@(normR, _) = ((rIx, map (_1 -~ h) r), stackTop)
         stackTop = Set.dropWhileAntitone ((< -depth) . fst) $ Set.map (_1 -~ h) cave
 
-stackHeight :: Int -> (CaveState, Int, Int, Int, Int) -> Int
-stackHeight n (contState, nr, h, dnr, dh) =
+stackHeight :: (CaveState, Int, Int, Int, Int) -> Int -> Int
+stackHeight (contState, nr, h, dnr, dh) n =
   let (cycleN, rRem) = (n - nr) `divMod` dnr
       Just state = find ((>= rRem) . (^. _4)) $ iterate stepCave contState
    in h + cycleN * dh + state ^. _5
 
 main :: IO ()
 main = do
-  cycleInfo <- findCycle 100 . parse <$> getContents
-  print $ stackHeight 2_022 cycleInfo
-  print $ stackHeight 1_000_000_000_000 cycleInfo
+  cycleInfo <- findCycle 100 . parseJets <$> getContents
+  print $ stackHeight cycleInfo 2_022
+  print $ stackHeight cycleInfo 1_000_000_000_000
   where
-    parse = cycle . zip [0 ..] . map (\d -> if d == '<' then -1 else 1) . init
+    parseJets = cycle . zip [0 ..] . map (\d -> if d == '<' then -1 else 1) . init

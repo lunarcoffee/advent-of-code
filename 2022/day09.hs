@@ -10,17 +10,17 @@ follow (a, b) t@(x, y) =
 
 runMove :: [Pos] -> Int -> [Pos]
 runMove ((x, y) : knots) dir =
-  let newHead = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)] !! dir
-   in scanl' follow newHead knots
+  let head' = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)] !! dir
+   in scanl' follow head' knots
 
 countTailPositions :: Int -> [Int] -> Int
 countTailPositions n = length . nub . map last . scanl' runMove (replicate n (0, 0))
 
 main :: IO ()
 main = do
-  moves <- parse <$> getContents
+  moves <- (parseMove <=< lines) <$> getContents
   print $ countTailPositions 2 moves
   print $ countTailPositions 10 moves
   where
+    parseMove = replicate <$> read . drop 2 <*> parseDir
     parseDir = head . flip elemIndices "LRUD" . head
-    parse = replicate <$> read . drop 2 <*> parseDir <=< lines

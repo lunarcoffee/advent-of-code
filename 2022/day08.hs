@@ -18,8 +18,6 @@ scenicScores = zipTransposed (*) scoreLines
 
 main :: IO ()
 main = do
-  trees <- parse <$> getContents
+  trees <- map (map $ read . (: [])) . lines <$> getContents
   print $ length $ filter id $ concat $ visibleGrid trees
   print $ maximum $ concat $ scenicScores trees
-  where
-    parse = map (map $ read . (: [])) . lines

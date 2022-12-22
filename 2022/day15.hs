@@ -28,9 +28,8 @@ distressTuningFreq from to bs =
 
 main :: IO ()
 main = do
-  beacons <- parse <$> getContents
+  beacons <- map parseBeacon . lines <$> getContents
   print $ sum $ map (uncurry subtract) $ noBeaconRanges 2_000_000 beacons
   print $ distressTuningFreq 0 4_000_000 beacons
   where
     parseBeacon = (\[a, b, x, y] -> ((a, b), (x, y))) . map (read . fst) . scan [re|-?\d+|]
-    parse = map parseBeacon . lines
