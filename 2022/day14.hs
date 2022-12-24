@@ -1,11 +1,12 @@
 import Data.Function (on)
 import Data.List (find)
 import Data.List.Split (splitOn)
+import Data.Set (Set)
 import Data.Set qualified as Set
 
 type Pos = (Int, Int)
 
-traceBlocked :: [[Pos]] -> (Set.Set Pos, Int)
+traceBlocked :: [[Pos]] -> (Set Pos, Int)
 traceBlocked = ((,) <*> maximum . Set.map snd) . foldr (Set.union . traceRock) Set.empty
   where
     traceRock = foldr (Set.union . traceLine) Set.empty . (zip <*> tail)
@@ -15,7 +16,7 @@ traceBlocked = ((,) <*> maximum . Set.map snd) . foldr (Set.union . traceRock) S
 convergeBy :: Eq b => (a -> b) -> (a -> a) -> a -> a
 convergeBy key = until =<< (((==) `on` key) =<<)
 
-addSand :: Int -> Bool -> Set.Set Pos -> Set.Set Pos
+addSand :: Int -> Bool -> Set Pos -> Set Pos
 addSand floor stopOnFloor bs
   | stopOnFloor && snd finalPos >= floor || (500, 0) `Set.member` bs = bs
   | otherwise = Set.insert finalPos bs
@@ -24,7 +25,7 @@ addSand floor stopOnFloor bs
     step p@(x, y) = maybe p step $ find isValid [(x, y + 1), (x - 1, y + 1), (x + 1, y + 1)]
     isValid p@(_, y) = p `Set.notMember` bs && y <= floor
 
-sandToFill :: Int -> Bool -> Set.Set Pos -> Int
+sandToFill :: Int -> Bool -> Set Pos -> Int
 sandToFill floor stopOnFloor =
   let convergeBlocked = convergeBy Set.size $ addSand floor stopOnFloor
    in Set.size . (Set.difference =<< convergeBlocked)

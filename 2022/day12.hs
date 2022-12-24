@@ -1,6 +1,7 @@
 import Data.Char (ord)
 import Data.List (elemIndices)
 import Data.Maybe (fromMaybe)
+import Data.Set (Set)
 import Data.Set qualified as Set
 
 type Pos = (Int, Int)
@@ -10,7 +11,7 @@ hs @ (x, y) = hs !! x !! y
 
 type Direction = (Pos -> Pos -> Bool) -> Pos -> Pos -> Bool
 
-minPathLength :: [[Int]] -> [(Pos, Int)] -> Set.Set Pos -> (Pos -> Bool) -> Direction -> Int
+minPathLength :: [[Int]] -> [(Pos, Int)] -> Set Pos -> (Pos -> Bool) -> Direction -> Int
 minPathLength hs ((src@(a, b), dist) : nexts) seen isDone dir
   | isDone src = dist
   | otherwise = minPathLength hs (nexts ++ adjs') seen' isDone dir

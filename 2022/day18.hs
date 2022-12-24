@@ -1,17 +1,18 @@
 import Control.Lens
 import Data.Foldable (toList)
 import Data.Ix (inRange)
+import Data.Set (Set)
 import Data.Set qualified as Set
 
 type Pos = (Int, Int, Int)
 
 adjs :: Pos -> [Pos]
-adjs p = map (p &) $ (%~) <$> [_1, _2, _3] <*> [pred, (+ 1)]
+adjs p = map (p &) $ (+~) <$> [_1, _2, _3] <*> [-1, 1]
 
-surfaceArea :: Set.Set Pos -> Int
+surfaceArea :: Set Pos -> Int
 surfaceArea ps = length $ filter (`Set.notMember` ps) $ adjs =<< toList ps
 
-externalArea :: Set.Set Pos -> Int
+externalArea :: Set Pos -> Int
 externalArea ps = length $ filter (`Set.member` ps) $ adjs =<< toList (fill (x, y, z) Set.empty)
   where
     fill p seen

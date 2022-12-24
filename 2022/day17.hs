@@ -3,6 +3,7 @@ import Control.Monad (guard)
 import Data.List (find)
 import Data.Map qualified as Map
 import Data.Maybe (fromMaybe)
+import Data.Set (Set)
 import Data.Set qualified as Set
 
 type Pos = (Int, Int)
@@ -16,7 +17,7 @@ rocks =
       square = [(4, 2), (4, 3), (5, 2), (5, 3)]
    in cycle $ zip [0 ..] [flat, cross, corner, pole, square]
 
-type CaveState = (Set.Set Pos, [(Int, [Pos])], [(Int, Int)], Int, Int)
+type CaveState = (Set Pos, [(Int, [Pos])], [(Int, Int)], Int, Int)
 
 stepCave :: CaveState -> CaveState
 stepCave (cave, (rIx, r) : rs, (_, j) : js, nr, h)
