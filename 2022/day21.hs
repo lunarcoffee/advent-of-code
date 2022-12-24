@@ -14,12 +14,13 @@ calculate vs v = case vs ! v of
   Expr a b op -> (op `on` calculate vs) a b
 
 humanValue :: Map String Expr -> Integer
-humanValue vs = let (a, b) = coeffs "root" in abs $ numerator $ -b / a
+humanValue vs = let (a, b) = coeffs "root" in numerator $ -b / a
   where
     coeffs ((vs !) -> Expr a b op) = if hasHuman a then wrap a b $ flip op else wrap b a op
     coeffs "humn" = (1, 0)
     wrap a b op =
-      let (fx, fy) = let op' = op $ calculate vs b in (if op 1 1 == 1 then op' else id, op')
+      let opIx = fromInteger $ numerator $ op 1 1
+          (fx, fy) = let op' = op $ calculate vs b in ([negate, op', id] !! opIx, op')
        in bimap fx fy $ coeffs a
     hasHuman ((vs !) -> Expr a b _) = any hasHuman [a, b]
     hasHuman v = v == "humn"
