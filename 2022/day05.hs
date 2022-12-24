@@ -1,4 +1,3 @@
-import Control.Arrow
 import Control.Lens
 import Data.Char (isAlpha, isDigit)
 import Data.List (foldl', transpose)
@@ -13,7 +12,7 @@ runMoves order = uncurry $ foldl' moveCrates
 
 main :: IO ()
 main = do
-  moves <- (parseState *** parseMoves) . span (/= "") . lines <$> getContents
+  moves <- bimap parseState parseMoves . span (/= "") . lines <$> getContents
   putStrLn $ map head $ runMoves reverse moves
   putStrLn $ map head $ runMoves id moves
   where
