@@ -28,7 +28,7 @@ stepCave (cave, (rIx, r) : rs, (_, j) : js, nr, h)
        in (foldr Set.insert cave sideR, spawnNext, js, nr + 1, h')
   where
     [r', sideR, _] = scanr ($) r [tryMove (_1 -~ 1), tryMove (_2 +~ j)]
-    tryMove = (fromMaybe <*>) . mapM . (((<$) <*> guard . isValid) .)
+    tryMove dir = fromMaybe <*> mapM (((<$) <*> guard . isValid) . dir)
     isValid p@(_, y) = p `Set.notMember` cave && y >= 0 && y < 7
 
 findCycle :: Int -> [(Int, Int)] -> (CaveState, Int, Int, Int, Int)
