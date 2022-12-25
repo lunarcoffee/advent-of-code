@@ -34,12 +34,10 @@ stepMove cs wrap s@(p, mo) m
     (p', mo') = wrap cs m' p
     m' = maybe m (fromFacing . (`mod` 4) . (+ mo)) $ toFacing m
 
-wrapSide :: Wrapping
+wrapSide, wrapCube :: Wrapping
 wrapSide cs m = (,0) . fromJust . find (isJust . (cs @)) . iterate wrapMove . m
   where
     wrapMove = (both %~ (`mod` 200)) . m
-
-wrapCube :: Wrapping
 wrapCube _ m p@(r, c)
   | fst << 49 = ifFacing 0 ((149 - r, 99), 2) ((149 - r, 0), 2)
   | fst << 99 = ifFacing 0 ((49, r + 50), 3) ((100, r - 50), 3)

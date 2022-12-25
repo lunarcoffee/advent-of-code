@@ -9,10 +9,8 @@ type Pos = (Int, Int, Int)
 adjs :: Pos -> [Pos]
 adjs p = map (p &) $ (+~) <$> [_1, _2, _3] <*> [-1, 1]
 
-surfaceArea :: Set Pos -> Int
+surfaceArea, externalArea :: Set Pos -> Int
 surfaceArea ps = length $ filter (`Set.notMember` ps) $ adjs =<< toList ps
-
-externalArea :: Set Pos -> Int
 externalArea ps = length $ filter (`Set.member` ps) $ adjs =<< toList (fill (x, y, z) Set.empty)
   where
     fill p seen

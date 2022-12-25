@@ -14,10 +14,8 @@ instance Ord Packet where
   compare a@(Int _) b = compare (List [a]) b
   compare a b = compare a $ List [b]
 
-orderedIndexSum :: [Packet] -> Int
+orderedIndexSum, decoderKey :: [Packet] -> Int
 orderedIndexSum = sum . map (+ 1) . findIndices (\[x, y] -> x < y) . chunksOf 2
-
-decoderKey :: [Packet] -> Int
 decoderKey =
   let dividers = map (\x -> List [List [Int x]]) [2, 6]
    in product . map (+ 1) . findIndices (`elem` dividers) . sort . (dividers ++)
