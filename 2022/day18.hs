@@ -1,4 +1,3 @@
-import Control.Arrow
 import Control.Lens
 import Data.Foldable (toList)
 import Data.Ix (inRange)
@@ -19,7 +18,7 @@ externalArea ps = length $ filter (`Set.member` ps) $ adjs =<< toList (fill (x, 
       | otherwise = foldr fill (Set.insert p seen) $ adjs p
     outOfBounds (x, y, z) = not $ and $ zipWith inRange bounds [x, y, z]
     bounds@[(x, _), (y, _), (z, _)] = map range [_1, _2, _3]
-    range dim = pred . minimum &&& (+ 1) . maximum $ Set.map (^. dim) ps
+    range dim = (,) <$> pred . minimum <*> (+ 1) . maximum $ Set.map (^. dim) ps
 
 main :: IO ()
 main = do
