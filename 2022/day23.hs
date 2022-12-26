@@ -29,6 +29,6 @@ main :: IO ()
 main = do
   elves <- map fst . iterate runRound . (,0) . parseMap . lines <$> getContents
   print $ emptyTiles $ elves !! 10
-  print $ length (takeWhile not $ zipWith (==) elves $ tail elves) + 1
+  print $ length (takeWhile id $ zipWith (/=) <*> tail $ elves) + 1
   where
     parseMap ls = Set.fromList [(x, y) | (x, l) <- zip [0 ..] ls, (y, '#') <- zip [0 ..] l]
