@@ -1,3 +1,4 @@
+import Control.Lens
 import Data.Char (ord)
 import Data.List (elemIndices)
 import Data.Maybe (fromMaybe)
@@ -12,14 +13,14 @@ hs @ (x, y) = hs !! x !! y
 type Direction = (Pos -> Pos -> Bool) -> Pos -> Pos -> Bool
 
 minPathLength :: [[Int]] -> [(Pos, Int)] -> Set Pos -> (Pos -> Bool) -> Direction -> Int
-minPathLength hs ((src@(a, b), dist) : nexts) seen isDone dir
+minPathLength hs ((src, dist) : nexts) seen isDone dir
   | isDone src = dist
   | otherwise = minPathLength hs (nexts ++ adjs') seen' isDone dir
   where
     seen' = foldr Set.insert seen $ src : map fst adjs'
     adjs' = [(n, dist + 1) | n <- adjs, n `Set.notMember` seen, dir canWalk src n]
     canWalk src dest = hs @ dest - hs @ src <= 1
-    adjs = filter inRange [(a - 1, b), (a + 1, b), (a, b - 1), (a, b + 1)]
+    adjs = filter inRange $ map (src &) $ (+~) <$> [_1, _2] <*> [1, -1]
     inRange (x, y) = and [x >= 0, y >= 0, x < length hs, y < length (head hs)]
 
 distForwardBetween :: [[Int]] -> Pos -> Pos -> Int
