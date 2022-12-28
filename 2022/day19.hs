@@ -1,4 +1,5 @@
 import Control.Lens
+import Control.Parallel.Strategies (parListChunk, parMap, rseq, using)
 import Data.Char (isDigit)
 import Data.Group (Group (..))
 import Data.List (elemIndex)
@@ -7,6 +8,7 @@ import Data.Maybe (fromJust)
 import Data.Semigroup (Semigroup (..), Sum (..))
 import Data.Vector.Unboxed (Vector, (!))
 import Data.Vector.Unboxed qualified as Vec
+import GHC.Conc (numCapabilities)
 
 type Materials = (Sum Int, Sum Int, Sum Int, Sum Int)
 
@@ -38,11 +40,16 @@ runBlueprint ((inv@(_, _, _, Sum g), gain@(_, _, _, Sum g'), t) : next) maxAt p@
 maxGeodes :: Int -> Blueprint -> Int
 maxGeodes n = runBlueprint [((0, 0, 0, 0), (1, 0, 0, 0), n)] $ Vec.replicate (n + 1) 0
 
+qualitiesPar :: Int -> [Blueprint] -> [Int]
+qualitiesPar n bps =
+  let chunkSize = 4 * length bps `div` numCapabilities
+   in zipWith ((*) . maxGeodes 24) bps [1 ..] `using` parListChunk chunkSize rseq
+
 main :: IO ()
 main = do
   blueprints <- map (parseBlueprint . parseCosts) . lines <$> getContents
-  print $ sum $ zipWith ((*) . maxGeodes 24) blueprints [1 ..]
-  print $ product $ map (maxGeodes 32) $ take 3 blueprints
+  print $ sum $ qualitiesPar 24 blueprints
+  print $ product $ parMap rseq (maxGeodes 32) $ take 3 blueprints
   where
     parseBlueprint [o, c, oo, oc, go, gb] =
       let costs = [(o, 0, 0, 0), (c, 0, 0, 0), (oo, oc, 0, 0), (go, 0, gb, 0)]

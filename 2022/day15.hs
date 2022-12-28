@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-import Control.Parallel.Strategies (parMap, rpar)
+import Control.Parallel.Strategies (parMap, rseq)
 import Data.Foldable (asum)
 import Data.List (find, foldl', sort)
 import GHC.Conc (numCapabilities)
@@ -19,9 +19,9 @@ noBeaconRanges y = (foldl' merge =<< (: []) . head) . sort . filter (uncurry (<=
 
 distressTuningFreq :: Int -> Int -> [(Pos, Pos)] -> Int
 distressTuningFreq from to bs =
-  let chunkSize = (to - from + 1) `div` numCapabilities * 4
+  let chunkSize = 4 * (to - from) `div` numCapabilities
       chunks = [[c .. c + chunkSize - 1] | c <- [from, from + chunkSize .. to]]
-      Just (y, [_, (_, x)]) = asum $ parMap rpar findBeacon chunks
+      Just (y, [_, (_, x)]) = asum $ parMap rseq findBeacon chunks
    in to * (x + 1) + y
   where
     findBeacon = find ((> 1) . length . snd) . (zip <*> map (`noBeaconRanges` bs))
