@@ -6,6 +6,7 @@
 set -e
 
 stack ghc \
+    --package groups \
     --package lens \
     --package megaparsec \
     --package pcre-heavy \
