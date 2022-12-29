@@ -8,7 +8,6 @@ import Data.Maybe (fromJust)
 import Data.Semigroup (Semigroup (..), Sum (..))
 import Data.Vector.Unboxed (Vector, (!))
 import Data.Vector.Unboxed qualified as Vec
-import GHC.Conc (numCapabilities)
 
 type Materials = (Sum Int, Sum Int, Sum Int, Sum Int)
 
@@ -40,15 +39,10 @@ runBlueprint ((inv@(_, _, _, Sum g), gain@(_, _, _, Sum g'), t) : next) maxAt p@
 maxGeodes :: Int -> Blueprint -> Int
 maxGeodes n = runBlueprint [((0, 0, 0, 0), (1, 0, 0, 0), n)] $ Vec.replicate (n + 1) 0
 
-qualitiesPar :: Int -> [Blueprint] -> [Int]
-qualitiesPar n bps =
-  let chunkSize = 4 * length bps `div` numCapabilities
-   in zipWith ((*) . maxGeodes 24) bps [1 ..] `using` parListChunk chunkSize rseq
-
 main :: IO ()
 main = do
   blueprints <- map (parseBlueprint . parseCosts) . lines <$> getContents
-  print $ sum $ qualitiesPar 24 blueprints
+  print $ sum (zipWith ((*) . maxGeodes 24) blueprints [1 ..] `using` parListChunk 6 rseq)
   print $ product $ parMap rseq (maxGeodes 32) $ take 3 blueprints
   where
     parseBlueprint [o, c, oo, oc, go, gb] =
