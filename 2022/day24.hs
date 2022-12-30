@@ -12,8 +12,8 @@ adjFns = (+~) <$> [_1, _2] <*> [-1, 1]
 
 type Blizzards = Map Pos [Pos -> Pos]
 
-minTripLength :: Blizzards -> (Int, Int) -> Pos -> Pos -> (Int, Blizzards)
-minTripLength v (mx, my) from to = minTripLength' v (Set.singleton from) 0
+minTripLength :: Blizzards -> (Int, Int) -> (Pos, Pos) -> (Int, Blizzards)
+minTripLength v (mx, my) (from, to) = minTripLength' v (Set.singleton from) 0
   where
     minTripLength' v ps t
       | to `Set.member` ps = (t, v)
@@ -29,7 +29,7 @@ loopTrips :: (Blizzards, (Int, Int)) -> [Int]
 loopTrips (v, bounds@(mx, my)) = loopMinLengths' (-1, 0) (mx, my - 1)
   where
     loopMinLengths' from to = map fst $ scanl' minTrip (0, v) $ cycle [(from, to), (to, from)]
-    minTrip (_, v') = uncurry $ minTripLength v' bounds
+    minTrip (_, v') = minTripLength v' bounds
 
 main :: IO ()
 main = do
