@@ -1,3 +1,5 @@
+{-# LANGUAGE ViewPatterns #-}
+
 import Control.Lens
 import Data.List (foldl', sort)
 import Data.List.Split (splitOn)
@@ -7,9 +9,9 @@ type Monkey = ([Integer], Integer -> Integer, Integer, Int, Int, Int)
 playRound :: (Integer -> Integer) -> [Monkey] -> [Monkey]
 playRound reduceWorry ms = foldl' playMonkey ms [0 .. length ms - 1]
   where
-    playMonkey ms m = foldl' processItem (ms & ix m . _6 +~ length inv & ix m . _1 .~ []) inv
+    playMonkey ms m@((ms !!) -> (inv, op, md, t, f, _)) = foldl' processItem ms' inv
       where
-        (inv, op, md, t, f, _) = ms !! m
+        ms' = ms & ix m . _6 +~ length inv & ix m . _1 .~ []
         processItem ms item =
           let item' = reduceWorry (op item) `mod` allMod
            in ms & ix (if item' `mod` md == 0 then t else f) . _1 %~ (++ [item'])

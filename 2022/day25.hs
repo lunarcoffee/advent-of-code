@@ -1,13 +1,14 @@
+import Control.Monad
+import Data.Foldable (toList)
 import Data.List (elemIndices, foldl1')
+import Data.Sequence (unfoldl)
 
-fromSnafu :: String -> Int
-fromSnafu = foldl1' ((+) . (5 *)) . map (2 -) . ((`elemIndices` "210-=") =<<)
-
-toSnafu :: Int -> String
-toSnafu 0 = ""
-toSnafu n = let (q, r) = (n + 2) `divMod` 5 in toSnafu q ++ ["=-012" !! r]
+toSnafu :: Int -> Maybe (Int, Char)
+toSnafu n = ("=-012" !!) <$> (n + 2) `divMod` 5 <$ guard (n > 0)
 
 main :: IO ()
 main = do
-  fuels <- map fromSnafu . lines <$> getContents
-  putStrLn $ toSnafu $ sum fuels
+  fuels <- map parseSnafu . lines <$> getContents
+  putStrLn $ toList $ unfoldl toSnafu $ sum fuels
+  where
+    parseSnafu = foldl1' ((+) . (5 *)) . map (2 -) . ((`elemIndices` "210-=") =<<)
