@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 # little script to run puzzle solutions with input from stdin
-# ./run day01
+# ./run 01
 
 set -e
 
@@ -11,9 +11,9 @@ stack ghc \
     --package megaparsec \
     --package pcre-heavy \
     --package split \
-    -- -O2 -threaded $1.hs
+    -- -O2 -threaded Day$1.hs
 
-printf "Running $1 ...\n\n"
-time ./$1 +RTS -N <input/$1.in
+printf "Running Day$1 ...\n\n"
+time ./Day$1 +RTS -N <input/day$1.in
 
-rm $1 $1.hi $1.o $1.dyn_hi $1.dyn_o 2>/dev/null
+rm Day$1 Day$1.hi Day$1.o Day$1.dyn_hi Day$1.dyn_o 2>/dev/null
