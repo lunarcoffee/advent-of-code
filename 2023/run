@@ -1,15 +1,11 @@
 #!/usr/bin/bash
 
-# little script to run puzzle solutions with input from stdin
+# Little script to run puzzle solutions with input from stdin
 # ./run 01
 
 set -e
 
 stack ghc \
-    --package groups \
-    --package lens \
-    --package megaparsec \
-    --package pcre-heavy \
     --package split \
     -- -O2 -threaded Day$1.hs
 
